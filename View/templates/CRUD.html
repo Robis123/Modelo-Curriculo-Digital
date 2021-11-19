@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link href="static/ajax.css" rel="stylesheet" type="text/css">
+  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <link rel="stylesheet" href="/resources/demos/style.css">
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <title>CRUD Pessoa</title>
+</head>
+<body>
+  <h1>CRUD Pessoa</h1>
+  <hr/>
+  <div>
+      <p>
+          Pesquisar nome: <input type="text" size="30" id="parte">
+          <button id="pesquisar">Buscar</button>
+      </p>
+  </div>
+  <hr/>
+  <form id="fm" method="post">
+      <table>
+          <tr>
+              <td>Número da Pessoa:</td>
+              <td><input type="text" id="idt" size="5" maxlength="5" disabled/></td>
+          </tr>
+          <tr>
+              <td>Nome da Pessoa:</td>
+              <td><input type="text" id="nme" size="50" maxlength="50" required/></td>
+          </tr>
+          <tr>
+              <td>Data de Nascimento:</td>
+              <td><input type="date" id="dta" required/></td>
+          </tr>
+          <tr>
+              <td>Telefone:</td>
+              <td><input type="text" id="tel" size="20" maxlength="20" required/></td>
+          </tr>
+      </table>
+      <hr/>
+      <br/>
+      <button id="limpar">Limpar</button>
+      <button id="incluir">Incluir</button>
+      <button id="alterar">Alterar</button>
+      <button id="excluir">Excluir</button>
+      <br/>
+      <br/>
+  </form>
+  <div id="msg" style="font-size:22px; color: white; background-color: blue; padding: 30px; display: none">
+
+  </div>
+
+   <div id="dialogo" title="Confirma Exclusão" style="display:none;">
+     Você realmente quer excluir?
+   </div>
+
+</body>
+</html>
+
+<script>
+   $.ajaxSetup({
+      type: "POST"
+   });
+
+   // Desligar a submissão automática do formulário
+   $( "#fm" ).submit(function( event ) {
+       event.preventDefault();
+   });
+
+   // Limpar as caixas de entrada de dados do HTML
+   $('#limpar').click(function (){
+       $('#msg').css("display", "none");
+       $('input').val("")
+
+       // Controlando os botões
+       $('#incluir').prop('disabled', false);
+       $('#alterar').prop('disabled', true);
+       $('#excluir').prop('disabled', true);
+
+   });
+
+   // Chamar rota para incluir pessoa
+   $('#incluir').click(function (){
+       $('#fm').submit();
+       if ($('#nme').val() != '' && $('#dta').val()!='' && $('#tel').val()!='') {
+           $.ajax({
+              url: "/incluir",
+              data: {nme: $('#nme').val(), dta: $('#dta').val(), tel: $('#tel').val()},
+              success: function(retorno) {
+                 $('#msg').css("display", "none");
+                 $("#msg").html(retorno);
+                 $('#msg').slideDown("slow");
+                 $("input").val("")
+              }
+           });
+       }
+   });
+
+   // Chamar rota para buscar pessoa
+   $('#pesquisar').click(function (){
+       $.ajax({
+          url: "/buscar",
+          data: {parte: $('#parte').val()},
+          success: function(retorno) {
+             if (retorno == '') {
+                 $('#msg').css("display", "none");
+                 $("#msg").html("Nome não encontrado na base de dados");
+                 $('#msg').slideDown("slow");
+             }
+             else{
+                 dados = retorno.split(',');
+                 $('#idt').val(dados[0]);
+                 $('#nme').val(dados[1]);
+                 $('#dta').val(dados[2]);
+                 $('#tel').val(dados[3]);
+             }
+          }
+       });
+       $('#incluir').prop('disabled', true);
+   });
+
+
+   // Chamar rota para alterar pessoa
+   $('#alterar').click(function (){
+       $('#fm').submit();
+       if ($('#idt').val() != '' && $('#nme').val() != '' && $('#dta').val()!='' && $('#tel').val()!='') {
+           $.ajax({
+              url: "/alterar",
+              data: {idt: $('#idt').val(), nme: $('#nme').val(), dta: $('#dta').val(), tel: $('#tel').val()},
+              success: function(retorno) {
+                 $('#msg').css("display", "none");
+                 $("#msg").html(retorno);
+                 $('#msg').slideDown("slow");
+                 $("input").val("")
+              }
+           });
+       }
+   });
+
+   // Chamar rota para excluir pessoa
+   $('#excluir').click(function (){
+       if ($('#idt').val() != '' && $('#nme').val() != '') {
+           $("#dialogo").dialog({
+                 buttons : {
+                   "Confirmar" : function() {
+                         $.ajax({
+                              url: "/excluir",
+                              data: {idt: $('#idt').val(), nme: $('#nme').val()},
+                              success: function(retorno) {
+                                 $('#dialogo').dialog("close");
+                                 $('#msg').css("display", "none");
+                                 $("#msg").html(retorno);
+                                 $('#msg').slideDown("slow");
+                                 $("input").val("")
+                              }
+                         });
+                   },
+                   "Cancelar" : function() {
+                         $('#dialogo').dialog("close");
+                   }
+                 }
+           });
+
+           $("#dialog").dialog("open");
+
+       }
+   });
+
+</script>
