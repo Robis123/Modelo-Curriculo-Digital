@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt">
+
+<head>
+  <meta charset="UTF-8" />
+  <script src="https://kit.fontawesome.com/ef3db9c3fe.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="/static/formatacao.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-+0n0xVW2eSR5OomGNYDnhzAbDsOXxcvSN1TPprVMTNDbiYZCxYbOOl7+AMvyTG2x" crossorigin="anonymous" />
+  <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+  <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+  <title>Lista de conhecimentos</title>
+</head>
+
+<body>
+  <header>
+    <div class="overlay"></div>
+  
+    <img src="/static/Gifdajinx.gif"/>
+  
+    <div class="container h-100">
+      <div class="d-flex h-100 text-center align-items-center">
+        <div class="w-100 text-white">
+          <h1 class="display-3">Lista de conhecimentos</h1>
+          <p class="lead mb-0">Uma página para verificar quais conhecimentos possuo nesse momento.</p>
+        </div>
+      </div>
+    </div>
+  </header>
+  <div class="d-flex justify-content-center">
+    <a href="/"><button type="button" id="botoes" class="btn mt-5">
+        Pág. Inicial
+      </button></a>
+  </div>
+  <div id="msg" style="display: none" class="alert alert-success mt-5" role="alert">
+  </div>
+
+  <div class="d-flex justify-content-center">
+    <button type="button" onclick="jsExpor()" class="btn" id="botaoForm">
+      Formulário de inclusão
+    </button>
+
+  </div>
+  <div id="formInclusao" style="display: none;">
+    <form method="post" id="formulario">
+      <div class="d-flex justify-content-center">
+        <label for="inputConhecimento" id="inputc" class="text-dark">Conhecimento</label>
+      </div>
+      <div class="d-flex justify-content-center">
+        <input type="text" class="form-control" id="inputConhecimento" name="conhecimento">
+      </div>
+      <div class="d-flex justify-content-center">
+        <button class="btn" id="incluir">Incluir</button>
+      </div>
+    </form>
+
+
+
+  </div>
+  
+
+  <div id="divLista" class="d-flex justify-content-center">
+    <form id="fm" method="post">
+      <table class="table table-bordered w-auto">
+        <tr>
+          <th>Conhecimentos</th>
+        </tr>
+        {{conhecimentos | safe}}
+      </table>
+    </form>
+
+  </div>
+
+  <footer class="text-center text-white" id="footer">
+    <div class="container p-4 pb-0">
+      <h1>Sobre mim</h1>
+      <p>Sou um estudante de ciência da computação na universidade uniCEUB, estou atualmente no 4º semestre.</p>
+      <section class="mb-4">
+        
+        <!-- Instagram -->
+        <a class="btn btn-outline-light btn-floating m-1" href="https://www.instagram.com/robisoliveira/" target="_blank" role="button"><i class="fab fa-instagram"></i></a>
+
+        <!-- Linkedin -->
+        <a class="btn btn-outline-light btn-floating m-1" href="https://www.linkedin.com/in/robson-monteiro-de-oliveira-b946841a2/" target="_blank" role="button"><i class="fab fa-linkedin-in"></i></a>
+
+        <!-- Github -->
+        <a class="btn btn-outline-light btn-floating m-1" href="https://github.com/Robis123" target="_blank" role="button"><i class="fab fa-github"></i></a>
+      </section>
+      <!-- Section: Social media -->
+    </div>
+
+    <div class="text-center p-3" id="copyright">
+      © 2021 Copyright:
+      <a class="text-white" href="https://github.com/Robis123" target="_blank">Robson Monteiro de Oliveira</a>
+    </div>
+  </footer>
+
+
+
+  <script>
+    function jsExpor() {
+      if ($('#formInclusao').css("display") == "none") {
+        $('#formInclusao').slideDown("slow");
+      } else {
+        $('#formInclusao').slideUp("slow");
+        //$('#formInclusao').css("display", "none");
+      }
+    }
+    function jsExcluir(conhecimento, idt) {
+      $("#fm").submit();
+      var conf = confirm("Deseja excluir o conhecimento " + conhecimento + "?")
+      if (!conf) {
+        return
+      }
+      $.ajax({
+        url: "/excluir",
+        data: { idt: idt, nme: conhecimento },
+        success: function (retorno) {
+          $('#msg').css("display", "none");
+          $("#msg").html(retorno);
+          $('#msg').slideDown("slow");
+          setInterval('location.reload(true)', 2000);
+        }
+      });
+    }
+
+    $.ajaxSetup({
+      type: "POST"
+    });
+
+    // Desligar a submissão automática do formulário
+    $("#formulario").submit(function (event) {
+      event.preventDefault();
+    });
+
+    $("#fm").submit(function (event) {
+      event.preventDefault();
+    });
+
+    // Chamar rota para incluir conhecimento
+    $('#incluir').click(function () {
+      $('#formulario').submit();
+      if ($('#inputConhecimento').val() != '') {
+        $.ajax({
+          url: "/incluir",
+          data: { nme: $('#inputConhecimento').val() },
+          success: function (retorno) {
+            $('#msg').css("display", "none");
+            $("#msg").html(retorno);
+            $('#msg').slideDown("slow");
+            setInterval('location.reload(true)', 2000);
+
+          }
+        });
+      } else {
+        alert("O campo conhecimento está em branco!");
+      }
+    });
+
+
+    // Chamar rota para alterar conhecimento
+    $('#alterar').click(function () {
+      $('#fm').submit();
+      if ($('#idt').val() != '' && $('#nme').val() != '' && $('#dta').val() != '' && $('#tel').val() != '') {
+        $.ajax({
+          url: "/alterar",
+          data: { idt: $('#idt').val(), nme: $('#nme').val(), dta: $('#dta').val(), tel: $('#tel').val() },
+          success: function (retorno) {
+            $('#msg').css("display", "none");
+            $("#msg").html(retorno);
+            $('#msg').slideDown("slow");
+            $("input").val("")
+          }
+        });
+      }
+    });
+
+
+
+
+
+  </script>
+
+</body>
+
+</html>
