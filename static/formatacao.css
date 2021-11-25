@@ -27,6 +27,10 @@ input {
    margin: 0.5rem 0;
 }
 
+textarea {
+   max-width: 20%;
+}
+
 #incluir {
    margin: 1rem 0;
 }
