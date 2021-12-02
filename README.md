@@ -5,4 +5,4 @@ Feito com Python (Com mysql.connector), Flask, JavaScript (Ajax/Jquery) e HTML/C
 
 Possui um Virtual Env, ou seja, não é necessário instalar as bibliotecas flask e mysql.connector.
 
-Se for necessário, rodar um comando "python -m venv *caminho da pasta*" e após isso, rodar os comandos "pip install flask" e "pip install mysql.connector".
+Se a virtual env não funcionar por qualquer motivo, apague-a e siga os seguintes passos: rodar um comando "python -m venv *caminho da pasta*" e após isso, rodar os comandos "pip install flask" e "pip install mysql.connector".
