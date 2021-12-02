@@ -1,3 +1,4 @@
+from werkzeug.utils import redirect
 from Utilitarios import bd
 from flask import Flask, render_template, request
 
@@ -37,26 +38,11 @@ def menu():
 def crudCurriculo():
   # Recuperando todos os modelos da base de dados
   mysql = bd.SQL("root", "robson123", "curriculorobis")
-  comando = "SELECT idt_conhecimento, nme_conhecimento, dta_conhecimento, desc_conhecimento FROM tb_conhecimentos ORDER BY nme_conhecimento;"
+  comando = "SELECT idt_conhecimento, nme_conhecimento, dta_conhecimento, desc_conhecimento FROM tb_conhecimentos ORDER BY idt_conhecimento;"
 
   cs = mysql.consultar(comando, ())
-  conhecimentos = ""
-  for [idt, nme, dta, desc] in cs:
-        conhecimentos += '<div class="col-md-4 mt-3 mb-3">'
-        conhecimentos += '<div class="card p-3">'
-        conhecimentos += '<div class="d-flex flex-row mb-3">'
-        conhecimentos += '<div class="d-flex flex-column ml-2">'
-        conhecimentos += f'<h5>{nme}</h5>'
-        conhecimentos += '</div>'
-        conhecimentos += '</div>'
-        conhecimentos += f'<h6>{desc}</h6>'
-        conhecimentos += '<div class="d-flex justify-content-between install mt-3">'
-        conhecimentos += f'<span>Data de aquisição: {dta}</span>'
-        conhecimentos += '<span class="text-primary">'
-        conhecimentos += '<i class="fa fa-angle-right"></i>'
-        conhecimentos += '</span>'
-        conhecimentos += '</div></div></div>'
-  cs.close()
+  conhecimentos = cs.fetchall()
+  
 
   return render_template('crudCurriculo.html', conhecimentos=conhecimentos)
 
@@ -78,21 +64,30 @@ def excluir():
 
   return msg
 
+@app.route('/formAlterar', methods=['GET', 'POST'])
+def pagalterar():
+  idt = int(request.form['idt'])
+  mysql = bd.SQL("root", "robson123", "curriculorobis")
+  comando = "SELECT * FROM tb_conhecimentos WHERE idt_conhecimento=%s;"
+
+  cs = mysql.consultar(comando, [idt])
+  listaConhecimento = cs.fetchone()
+  return render_template("formAlterar.html", listaConhecimento=listaConhecimento)
+
 @app.route('/alterar', methods=['GET', 'POST'])
 def alterar():
-  # Recuperando dados do formulário de crudCurriculo()
   idt = int(request.form['idt'])
-  nme = request.form['nme']
+  nme = request.form['inputNome']
+  desc = request.form['inputDesc']
+  dta = request.form['inputData']
   # Excluindo dados no SGBD
   mysql = bd.SQL("root", "robson123", "curriculorobis")
-  comando = "DELETE FROM tb_conhecimentos WHERE idt_conhecimento=%s;"
+  comando = "UPDATE tb_conhecimentos SET nme_conhecimento = %s, dta_conhecimento = %s, desc_conhecimento = %s WHERE idt_conhecimento = %s "
 
-  if mysql.executar(comando, [idt]):
-      msg=f"Conhecimento {nme} excluído com sucesso!"
-  else:
-      msg=f"Falha na exclusão do conhecimento {nme}."
+  mysql.executar(comando, [nme, dta, desc, idt])
+     
 
-  return msg
+  return redirect("/crudCurriculo")
 
 app.run()
   

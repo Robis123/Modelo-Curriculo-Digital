@@ -73,13 +73,40 @@
 
   </div>
 
-
   <div class="container mt-5">
     <div class="jumbotron jumbotron-fluid mb-5" id="empresas">
       <h1 class="display-5 text-center">Conhecimentos</h1>
     </div>
     <div class="row mb-5">
-      {{ conhecimentos | safe }}
+      {% for n in conhecimentos %}
+      <div class="col-md-4 mt-3 mb-3">
+        <div class="card p-3">
+          <div class="d-flex flex-row mb-3">
+            <div class="d-flex flex-column ml-2">
+              <h5>{{n[1]}}</h5>
+            </div>
+          </div>
+          <h6>{{n[3]}}</h6>
+          <div class="d-flex justify-content-between install mt-3">
+            <span>Data de aquisição: {{n[2]}}</span>
+          </div>
+          <div class="d-flex flex-row p-3 mb-3">
+            <form id="fmExcluir{{ n[0] }}" class="formexcluir" method="post">
+              <button type="button" style="margin-right: 1rem" id="botaoExcluir"
+                onclick="jsExcluir('{{ n[1] }}', '{{ n[0] }}')" class="btn">Excluir</button>
+
+            </form>
+            <form id="fmAlterar{{ n[0] }}" action="/formAlterar" method="post">
+              <input type="text" name="idt" value="{{ n[0] }}" style="display: none;" id="inputPesquisa" />
+
+              <button type="submit" id="botoes" class="btn">Alterar</button>
+
+            </form>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+
     </div>
   </div>
 
@@ -114,6 +141,13 @@
 
 
   <script>
+    function jsAlterar(conhecimento, idt) {
+      $("#fmAlterar" + idt).submit();
+      $.post("/alterar", { idt: idt, nme: conhecimento }, function (retorno) {
+        console.log(retorno);
+      });
+    }
+
     function jsExpor() {
       if ($('#formInclusao').css("display") == "none") {
         $('#formInclusao').slideDown("slow");
@@ -123,7 +157,7 @@
       }
     }
     function jsExcluir(conhecimento, idt) {
-      $("#fm").submit();
+      $("#fmExcluir" + idt).submit();
       var conf = confirm("Deseja excluir o conhecimento " + conhecimento + "?")
       if (!conf) {
         return
@@ -146,6 +180,12 @@
 
     // Desligar a submissão automática do formulário
     $("#formulario").submit(function (event) {
+      event.preventDefault();
+    });
+    $(".formalterar").submit(function (event) {
+      event.preventDefault();
+    });
+    $(".formexcluir").submit(function (event) {
       event.preventDefault();
     });
 
@@ -175,22 +215,6 @@
     });
 
 
-    // Chamar rota para alterar conhecimento
-    $('#alterar').click(function () {
-      $('#fm').submit();
-      if ($('#idt').val() != '' && $('#nme').val() != '' && $('#dta').val() != '' && $('#tel').val() != '') {
-        $.ajax({
-          url: "/alterar",
-          data: { idt: $('#idt').val(), nme: $('#nme').val(), dta: $('#dta').val(), tel: $('#tel').val() },
-          success: function (retorno) {
-            $('#msg').css("display", "none");
-            $("#msg").html(retorno);
-            $('#msg').slideDown("slow");
-            $("input").val("")
-          }
-        });
-      }
-    });
 
 
 

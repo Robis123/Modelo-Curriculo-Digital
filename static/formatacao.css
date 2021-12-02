@@ -57,12 +57,27 @@ textarea {
    margin: 3rem;
 }
 
+#labelUpdate {
+   margin: 0 9rem 1rem 9rem;
+}
+
+#textAreaUpdate {
+   width: 80rem;
+}
+
+#inputUpdate {
+   margin: 0 4rem;
+   max-width: 20rem;
+}
+
 #botaoExcluir {
    background-color: #D00000;
+   color: white;
 }
 
 #footer {
    background-color: #3F88C5;
+   margin-top: 3rem;
 }
 
 header {
@@ -72,6 +87,7 @@ header {
    min-height: 25rem;
    width: 100%;
    overflow: hidden;
+   margin-bottom: 3rem;
  }
  
  header img {
